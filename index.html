@@ -5,5 +5,45 @@
 </head>
 <body>
 <a href="appinfos.html?app=Cowabunga" target="_blank">Afficher</a>
+<script>
+    <script>
+    // Récupérer le nom de l'application depuis les paramètres d'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const appName = urlParams.get('app');
+
+    // Charger le fichier JSON externe contenant les informations des applications
+    const jsonURL = 'apps.json';
+    fetch(jsonURL)
+        .then(response => response.json())
+        .then(appData => {
+            const appInfoContainer = document.getElementById("appInfo");
+            const appCategoryKeys = Object.keys(appData);
+
+            for (const categoryKey of appCategoryKeys) {
+                const appList = appData[categoryKey];
+                const app = appList.find(app => app.name === appName);
+
+                if (app) {
+                    const appInfoHTML = `
+                        <h2>${app.name}</h2>
+                        <p><strong>Developer:</strong> ${app.developer}</p>
+                        <p><strong>Version:</strong> ${app.version}</p>
+                        <p><strong>Compatibility:</strong> ${app.compatibility}</p>
+                        <p><strong>Description:</strong> ${app.description}</p>
+                        <img src="${app.icon}" alt="${app.name} Icon" width="100">
+                        <a href="${app.ipa}" target="_blank">Download IPA</a>
+                    `;
+
+                    appInfoContainer.innerHTML = appInfoHTML;
+                    break;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading JSON:', error);
+        });
+</script>
+
+</script>
 </body>
 </html>
