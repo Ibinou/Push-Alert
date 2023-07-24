@@ -1,49 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Formulaire pour envoyer une Web Push Notification</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Information</title>
 </head>
 <body>
-<a href="appinfos.html?app=Cowabunga" target="_blank">Afficher</a>
-<script>
+    <h1>App Information</h1>
+    <div id="appInfo"></div>
+
     <script>
-    // Récupérer le nom de l'application depuis les paramètres d'URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const appName = urlParams.get('app');
+        // Function to parse URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
 
-    // Charger le fichier JSON externe contenant les informations des applications
-    const jsonURL = 'https://ibinou.github.io/Push-Alert/apps.json';
-    fetch(jsonURL)
-        .then(response => response.json())
-        .then(appData => {
-            const appInfoContainer = document.getElementById("appInfo");
-            const appCategoryKeys = Object.keys(appData);
+        // Main function to fetch and display app information
+        function displayAppInfo() {
+            // Fetch the JSON data (replace 'your_json_url_here' with the actual URL)
+            fetch('https://ibinou.github.io/Push-Alert/apps.json') // Replace 'your_json_url_here' with the actual URL of your JSON file
+                .then(response => response.json())
+                .then(data => {
+                    const appId = getUrlParameter('id');
+                    const appInfo = data.Utilities.find(app => app.name === appId);
 
-            for (const categoryKey of appCategoryKeys) {
-                const appList = appData[categoryKey];
-                const app = appList.find(app => app.name === appName);
+                    if (appInfo) {
+                        // Build the HTML to display app information
+                        const appDiv = document.getElementById('appInfo');
+                        appDiv.innerHTML = `
+                            <h2>${appInfo.name}</h2>
+                            <p>Developer: ${appInfo.developer}</p>
+                            <p>Version: ${appInfo.version}</p>
+                            <p>Compatibility: ${appInfo.compatibility}</p>
+                            <p>Description: ${appInfo.description}</p>
+                            <img src="${appInfo.icon}" alt="${appInfo.name} Icon">
+                            <a href="${appInfo.ipa}" target="_blank" rel="noopener noreferrer">Download IPA</a>
+                        `;
+                    } else {
+                        // Handle the case when the app ID is not found
+                        const appDiv = document.getElementById('appInfo');
+                        appDiv.innerHTML = '<p>App not found.</p>';
+                    }
+                })
+                .catch(error => console.error('Error fetching app data:', error));
+        }
 
-                if (app) {
-                    const appInfoHTML = `
-                        <h2>${app.name}</h2>
-                        <p><strong>Developer:</strong> ${app.developer}</p>
-                        <p><strong>Version:</strong> ${app.version}</p>
-                        <p><strong>Compatibility:</strong> ${app.compatibility}</p>
-                        <p><strong>Description:</strong> ${app.description}</p>
-                        <img src="${app.icon}" alt="${app.name} Icon" width="100">
-                        <a href="${app.ipa}" target="_blank">Download IPA</a>
-                    `;
-
-                    appInfoContainer.innerHTML = appInfoHTML;
-                    break;
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error loading JSON:', error);
-        });
-</script>
-
-</script>
+        // Call the function to display app information
+        displayAppInfo();
+    </script>
 </body>
 </html>
+
